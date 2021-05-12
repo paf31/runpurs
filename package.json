@@ -1,0 +1,14 @@
+{
+  "name": "runpurs",
+  "version": "1.0.0",
+  "description": "",
+  "bin": {
+    "runpurs": "./index.js"
+  },
+  "dependencies": {
+    "purescript": "^0.14.1"
+  },
+  "devDependencies": {},
+  "author": "Phil Freeman",
+  "license": "MIT"
+}
