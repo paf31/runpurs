@@ -6,7 +6,8 @@
     "runpurs": "./index.js"
   },
   "dependencies": {
-    "purescript": "^0.14.1"
+    "purescript": "^0.14.1",
+    "tmp": "^0.2.1"
   },
   "devDependencies": {},
   "author": "Phil Freeman",

@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const tmp = require('tmp');
+const path = require('path');
 const purs = require('purescript');
 const { spawnSync } = require('child_process');
 
 const expression = process.argv[2] || '\\input -> input';
 
 const input = JSON.parse(fs.readFileSync('/dev/stdin', 'utf8'));
-fs.writeFileSync('/tmp/Main.purs', `
+
+const inputFile = tmp.fileSync({ postfix: '.purs' }).name;
+const outputFolder = tmp.dirSync().name;
+
+fs.writeFileSync(inputFile, `
 module Main where
 
 foreign import data Expr :: Type -> Type
@@ -24,7 +30,7 @@ main =
   ${ expression.split('\n').join('\n  ') }
 `);
 
-var spawn = spawnSync(purs, ['compile', '-g', 'corefn', '-o', '/tmp/output', '--json-errors', '/tmp/Main.purs'], { stdio: 'pipe' })
+var spawn = spawnSync(purs, ['compile', '-g', 'corefn', '-o', outputFolder, '--json-errors', inputFile], { stdio: 'pipe' })
 var spawnOutput = JSON.parse(spawn.stdout.toString());
 
 if (spawnOutput.errors.length) {
@@ -33,8 +39,12 @@ if (spawnOutput.errors.length) {
   return;
 }
 
-const corefn = JSON.parse(fs.readFileSync('/tmp/output/Main/corefn.json', 'utf8'));
+const corefn = JSON.parse(fs.readFileSync(path.join(outputFolder, 'Main', 'corefn.json'), 'utf8'));
 
+// TODO: this is unnecessary, since we only support a single 
+// declaration right now anyway. However, that might change,
+// in which case we should add each of these to the initialEnv
+// object.
 var decls = {};
 corefn.decls.forEach((decl) => {
   decls[decl.identifier] = decl.expression;
